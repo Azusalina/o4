@@ -1,0 +1,56 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'io.folderaudio.player'
+    compileSdk 35
+    ndkVersion '28.2.13676358'
+
+    defaultConfig {
+        applicationId 'io.folderaudio.player'
+        minSdk 26
+        targetSdk 35
+        versionCode 1
+        versionName '1.0.0'
+
+        ndk {
+            abiFilters 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64'
+        }
+
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_STL=c++_static'
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    externalNativeBuild {
+        cmake {
+            path 'src/main/cpp/CMakeLists.txt'
+            version '3.22.1'
+        }
+    }
+}
+
+def ndkDirectory = androidComponents.sdkComponents.ndkDirectory
+def buildFfmpeg = rootProject.file('scripts/build-ffmpeg.sh')
+def ffmpegTask = tasks.register('prepareFfmpeg', Exec) {
+    inputs.file buildFfmpeg
+    inputs.property 'ndkVersion', android.ndkVersion
+    outputs.dir rootProject.file('.native/ffmpeg')
+    doFirst {
+        commandLine 'bash', buildFfmpeg, ndkDirectory.get().asFile
+    }
+}
+
+tasks.configureEach {
+    if (name == 'preBuild' || name.startsWith('configureCMake') || name.startsWith('buildCMake')) {
+        dependsOn ffmpegTask
+    }
+}
