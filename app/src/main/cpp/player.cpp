@@ -69,7 +69,8 @@ public:
         if (policy == RequireExclusive && android_get_device_api_level() < 27) {
             throw std::runtime_error("Exclusive output requires Android 8.1 or later.");
         }
-        if (policy <= RequireExclusive && android_get_device_api_level() >= 27) {
+        if ((policy == PreferExclusive || policy == RequireExclusive)
+                && android_get_device_api_level() >= 27) {
             stream_ = openStream(decoder_.sourceRate(), true);
             if (!stream_) stream_ = openStream(AAUDIO_UNSPECIFIED, true);
             exclusive_ = bool(stream_);

@@ -9,12 +9,12 @@ archive="$work/ffmpeg-$version.tar.xz"
 source="$work/ffmpeg-$version"
 mkdir -p "$work/ffmpeg"
 
-if [[ ! -f "$archive" ]]; then
-    curl --fail --location --retry 2 "https://ffmpeg.org/releases/ffmpeg-$version.tar.xz" -o "$archive.part"
-    xz -t "$archive.part"
-    mv "$archive.part" "$archive"
-fi
 if [[ ! -f "$source/configure" ]]; then
+    if [[ ! -f "$archive" ]]; then
+        curl --fail --location --retry 2 "https://ffmpeg.org/releases/ffmpeg-$version.tar.xz" -o "$archive.part"
+        xz -t "$archive.part"
+        mv "$archive.part" "$archive"
+    fi
     tar -xf "$archive" -C "$work"
 fi
 
